@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <title>導回 App 中...</title>
+  <title>正在導回 App...</title>
   <style>
     body { font-family: sans-serif; text-align: center; margin-top: 80px; }
     .emoji { font-size: 2rem; }
@@ -23,10 +23,10 @@
       const desc = params.get('error_description') || '未知錯誤';
       status.textContent = `⚠️ 驗證失敗：${desc}`;
     } else if (code) {
-      const deeplink = `io.supabase.flutter://login-callback?code=${code}`;
+      const intentUrl = `intent://login-callback?code=${code}#Intent;scheme=io.supabase.flutter;package=com.julianchou.my_supabase_app;end`;
       status.textContent = "✅ 將自動導回 App...";
       setTimeout(() => {
-        window.location.replace(deeplink);
+        window.location.href = intentUrl;
       }, 500);
     } else {
       status.textContent = "⚠️ 無法取得驗證資訊，請重新登入。";
