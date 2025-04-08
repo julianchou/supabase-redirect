@@ -1,52 +1,92 @@
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-  <meta charset="UTF-8">
-  <title>正在導回 App...</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      margin-top: 80px;
+import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:app_links/app_links.dart';
+
+class InitPage extends StatefulWidget {
+  const InitPage({super.key});
+
+  @override
+  State<InitPage> createState() => _InitPageState();
+}
+
+class _InitPageState extends State<InitPage> {
+  final _appLinks = AppLinks();
+  bool _hasHandled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _listenToDeepLinks();
+    _checkAndInit();
+  }
+
+  void _listenToDeepLinks() {
+    _appLinks.uriLinkStream.listen((uri) {
+      if (_hasHandled || uri == null) return;
+
+      final deeplink = uri.toString();
+      print("📩 收到 Deep Link：$deeplink");
+
+      if (uri.scheme == 'io.supabase.flutter' && uri.host == 'login-callback') {
+        _hasHandled = true;
+        _handleLoginRedirect(deeplink);
+      }
+    });
+  }
+
+  Future<void> _handleLoginRedirect(String deeplink) async {
+    try {
+      final response = await Supabase.instance.client.auth.exchangeCodeForSession(deeplink);
+      final session = response.session;
+
+      if (session != null) {
+        print("✅ 登入成功：${session.user?.email}");
+        if (mounted) {
+          Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
+        }
+      } else {
+        _showError("⚠️ 登入失敗，請重新嘗試");
+      }
+    } catch (e) {
+      print("❗️ exchangeCodeForSession 發生錯誤：$e");
+      _showError("驗證失敗，請重新登入");
     }
-    .emoji {
-      font-size: 2rem;
+  }
+
+  void _showError(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    Navigator.of(context).pushReplacementNamed('/login');
+  }
+
+  Future<void> _checkAndInit() async {
+    final user = Supabase.instance.client.auth.currentUser;
+    print("🔍 檢查目前使用者：${user?.email}");
+
+    if (user == null) {
+      Navigator.of(context).pushReplacementNamed('/login');
+      return;
     }
-  </style>
-</head>
-<body>
-  <div class="emoji">🔁</div>
-  <h2>正在導回 App，請稍候...</h2>
-  <p id="status"></p>
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get('code');
-    const error = params.get('error');
-    const errorDesc = params.get('error_description');
-    const status = document.getElementById('status');
-    
-    if (error) {
-      status.textContent = `❌ 找不到驗證資訊，請重新登入。\n錯誤：${decodeURIComponent(errorDesc || error)}`;
-    } else if (code) {
-      // 重要：確保將 code 正確編碼
-      const encodedCode = encodeURIComponent(code);
-      const deeplink = `io.supabase.flutter://login-callback?code=${encodedCode}`;
-      status.textContent = "✅ 將自動導回 App...";
-      
-      console.log("重定向至:", deeplink);
-      
-      // 延遲 500ms 後導向 App
-      setTimeout(() => {
-        window.location.href = deeplink;
-        
-        // 額外防護：如果 3 秒後頁面仍未跳轉，提示用戶手動操作
-        setTimeout(() => {
-          status.innerHTML = "⚠️ 自動跳轉失敗，請<a href='" + deeplink + "'>點擊這裡</a>嘗試手動打開 App";
-        }, 3000);
-      }, 500);
-    } else {
-      status.textContent = "⚠️ 無法取得驗證資訊，請重新登入。";
+
+    final uid = user.id;
+    final profile = await Supabase.instance.client
+        .from('profiles')
+        .select()
+        .eq('id', uid)
+        .maybeSingle();
+
+    if (profile == null) {
+      await Supabase.instance.client.from('profiles').insert({
+        'id': uid,
+        'nickname': user.email?.split('@')[0],
+      });
     }
-  </script>
-</body>
-</html>
+
+    Navigator.of(context).pushReplacementNamed('/home');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(body: Center(child: CircularProgressIndicator()));
+  }
+}
