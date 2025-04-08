@@ -21,24 +21,26 @@
 
   <script>
     const params = new URLSearchParams(window.location.search);
-    const token = params.get('code');
-    const type = params.get('type');
+    const code = params.get('code');
+    const token = params.get('token');
     const error = params.get('error');
     const errorDesc = params.get('error_description');
     const status = document.getElementById('status');
 
     if (error) {
-      status.textContent = `❌ 錯誤：${errorDesc || '未知錯誤，請重新登入。'}`;
-    } else if (token && type === 'magiclink') {
-      const deeplink = `io.supabase.flutter://login-callback?token=${token}`;
-      status.textContent = '✅ 驗證成功，正在返回 App...';
-
-      // ✅ 延遲 800 毫秒再跳轉（讓 App 有時間初始化）
+      // ⛔️ 顯示錯誤訊息
+      status.textContent = `❌ 找不到驗證資訊，請重新登入。\n錯誤：${decodeURIComponent(errorDesc || error)}`;
+    } else if (code || token) {
+      const key = code || token;
+      const deeplink = `io.supabase.flutter://login-callback?code=${key}`;
+      status.textContent = "✅ 將自動導回 App...";
+      
+      // 延遲 800ms 後導向 App（讓畫面有機會顯示）
       setTimeout(() => {
         window.location.replace(deeplink);
       }, 800);
     } else {
-      status.textContent = '⚠️ 無法取得驗證資訊，請重新登入。';
+      status.textContent = "⚠️ 無法取得驗證資訊，請重新登入。";
     }
   </script>
 </body>
