@@ -29,7 +29,7 @@
         : `io.supabase.flutter://login-callback?token=${token}`;
       status.textContent = "✅ 將自動導回 App...";
       setTimeout(() => {
-        window.location.replace(deeplink); // ✅ 使用 replace 最穩定
+        window.location.replace(redirect); // ✅ 使用 replace 最穩定
       }, 800);
     } else {
       status.textContent = "⚠️ 無法取得驗證資訊，請重新登入。";
