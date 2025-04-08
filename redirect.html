@@ -28,7 +28,9 @@
         ? `io.supabase.flutter://login-callback?code=${code}`
         : `io.supabase.flutter://login-callback?token=${token}`;
       status.textContent = "✅ 將自動導回 App...";
-      setTimeout(() => window.location.replace(redirect), 800);
+      setTimeout(() => {
+        window.location.href = "intent://login-callback?code=" + code + "#Intent;scheme=io.supabase.flutter;package=com.julianchou.my_supabase_app;end";
+      }, 800);
     } else {
       status.textContent = "⚠️ 無法取得驗證資訊，請重新登入。";
     }
