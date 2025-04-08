@@ -6,17 +6,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script>
     const url = new URL(window.location.href);
-    const code = url.searchParams.get("code");
+    const code = url.searchParams.get("token");
     const type = url.searchParams.get("type");
   
     if (code && type === "magiclink") {
-      // ✅ 這裡組出 App 的 deep link
       const deeplink = `io.supabase.flutter://login-callback?code=${code}`;
       window.location.replace(deeplink);
     } else {
       document.body.innerHTML = "<h2>找不到驗證資訊，請重新登入。</h2>";
     }
   </script>
+
 
 </head>
 <body style="text-align:center; padding-top:60px;">
