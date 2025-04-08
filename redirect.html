@@ -5,22 +5,23 @@
   <title>正在導回 App...</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script>
-    // 取得 URL 中的 code 與 type
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get("code");
-    const type = params.get("type");
+    window.onload = function () {
+      const url = new URL(window.location.href);
+      const code = url.searchParams.get("code");
+      const type = url.searchParams.get("type") || "magiclink";
 
-    // 重新導向回 App 的 Deep Link
-    if (code) {
-      const redirectUrl = `io.supabase.flutter://login-callback?code=${code}&type=${type}`;
-      console.log("🔁 導向 App：", redirectUrl);
-      window.location.href = redirectUrl;
-    } else {
-      document.write("<h2>找不到驗證資訊，請重新登入。</h2>");
-    }
+      if (code) {
+        const redirectUrl = `io.supabase.flutter://login-callback?code=${code}&type=${type}`;
+        console.log("🔁 導向 App：", redirectUrl);
+        window.location.replace(redirectUrl);
+      } else {
+        document.getElementById("msg").innerHTML =
+          "❌ 找不到驗證資訊，請重新登入。";
+      }
+    };
   </script>
 </head>
-<body>
-  <p style="text-align: center; margin-top: 40px;">🔁 正在導回 App，請稍候...</p>
+<body style="text-align:center; padding-top:60px;">
+  <h2 id="msg">🔁 正在導回 App，請稍候...</h2>
 </body>
 </html>
