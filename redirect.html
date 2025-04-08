@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>正在導回 App...</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    // 取得 URL 中的 code 與 type
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
+    const type = params.get("type");
+
+    // 重新導向回 App 的 Deep Link
+    if (code) {
+      const redirectUrl = `io.supabase.flutter://login-callback?code=${code}&type=${type}`;
+      console.log("🔁 導向 App：", redirectUrl);
+      window.location.href = redirectUrl;
+    } else {
+      document.write("<h2>找不到驗證資訊，請重新登入。</h2>");
+    }
+  </script>
+</head>
+<body>
+  <p style="text-align: center; margin-top: 40px;">🔁 正在導回 App，請稍候...</p>
+</body>
+</html>
