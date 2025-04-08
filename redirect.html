@@ -18,27 +18,32 @@
   <div class="emoji">🔁</div>
   <h2>正在導回 App，請稍候...</h2>
   <p id="status"></p>
-
   <script>
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
-    const token = params.get('token');
     const error = params.get('error');
     const errorDesc = params.get('error_description');
     const status = document.getElementById('status');
-
+    
     if (error) {
-      // ⛔️ 顯示錯誤訊息
       status.textContent = `❌ 找不到驗證資訊，請重新登入。\n錯誤：${decodeURIComponent(errorDesc || error)}`;
-    } else if (code || token) {
-      const key = code || token;
-      const deeplink = `io.supabase.flutter://login-callback?code=${key}`;
+    } else if (code) {
+      // 重要：確保將 code 正確編碼
+      const encodedCode = encodeURIComponent(code);
+      const deeplink = `io.supabase.flutter://login-callback?code=${encodedCode}`;
       status.textContent = "✅ 將自動導回 App...";
       
-      // 延遲 800ms 後導向 App（讓畫面有機會顯示）
+      console.log("重定向至:", deeplink);
+      
+      // 延遲 500ms 後導向 App
       setTimeout(() => {
-        window.location.replace(deeplink);
-      }, 800);
+        window.location.href = deeplink;
+        
+        // 額外防護：如果 3 秒後頁面仍未跳轉，提示用戶手動操作
+        setTimeout(() => {
+          status.innerHTML = "⚠️ 自動跳轉失敗，請<a href='" + deeplink + "'>點擊這裡</a>嘗試手動打開 App";
+        }, 3000);
+      }, 500);
     } else {
       status.textContent = "⚠️ 無法取得驗證資訊，請重新登入。";
     }
