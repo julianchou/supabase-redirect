@@ -8,9 +8,12 @@
     const url = new URL(window.location.href);
     const code = url.searchParams.get("token");
     const type = url.searchParams.get("type");
-  
+    console.log("🔁 token:", code);
+    console.log("🔁 type:", type);
     if (code && type === "magiclink") {
       const deeplink = `io.supabase.flutter://login-callback?code=${code}`;
+      console.log("🔁 Redirecting to app:", deeplink);
+
       window.location.replace(deeplink);
     } else {
       document.body.innerHTML = "<h2>找不到驗證資訊，請重新登入。</h2>";
