@@ -3,26 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <title>正在導回 App...</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script>
-    const url = new URL(window.location.href);
-    const code = url.searchParams.get("token");
-    const type = url.searchParams.get("type");
-    console.log("🔁 token:", code);
-    console.log("🔁 type:", type);
-    if (code && type === "magiclink") {
-      const deeplink = `io.supabase.flutter://login-callback?code=${code}`;
-      console.log("🔁 Redirecting to app:", deeplink);
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      margin-top: 80px;
+    }
+    .emoji {
+      font-size: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="emoji">🔁</div>
+  <h2>正在導回 App，請稍候...</h2>
+  <p id="status"></p>
 
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+    const error = params.get('error');
+    const status = document.getElementById('status');
+
+    if (error) {
+      const errorMsg = params.get('error_description') || '未知錯誤';
+      status.textContent = `❌ 找不到驗證資訊，請重新登入。\n錯誤：${errorMsg}`;
+    } else if (code) {
+      const deeplink = `io.supabase.flutter://login-callback?code=${code}`;
+      status.textContent = "✅ 將自動導回 App...";
+      // 自動轉跳
       window.location.replace(deeplink);
     } else {
-      document.body.innerHTML = "<h2>找不到驗證資訊，請重新登入。</h2>";
+      status.textContent = "⚠️ 無法取得驗證資訊，請重新登入。";
     }
   </script>
-
-
-</head>
-<body style="text-align:center; padding-top:60px;">
-  <h2 id="msg">🔁 正在導回 App，請稍候...</h2>
 </body>
 </html>
