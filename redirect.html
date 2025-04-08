@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <title>正在導回 App...</title>
+  <title>導回 App 中...</title>
   <style>
     body { font-family: sans-serif; text-align: center; margin-top: 80px; }
     .emoji { font-size: 2rem; }
@@ -15,22 +15,19 @@
 
   <script>
     const params = new URLSearchParams(window.location.search);
-    const code = params.get('code');
-    const token = params.get('token');
+    const code = params.get('code') || params.get('token');
     const error = params.get('error');
     const status = document.getElementById('status');
 
     if (error) {
       const desc = params.get('error_description') || '未知錯誤';
       status.textContent = `⚠️ 驗證失敗：${desc}`;
-    } else if (code || token) {
-      const redirect = code
-        ? `io.supabase.flutter://login-callback?code=${code}`
-        : `io.supabase.flutter://login-callback?token=${token}`;
+    } else if (code) {
+      const deeplink = `io.supabase.flutter://login-callback?code=${code}`;
       status.textContent = "✅ 將自動導回 App...";
       setTimeout(() => {
-        window.location.replace(redirect); // ✅ 使用 replace 最穩定
-      }, 800);
+        window.location.replace(deeplink);
+      }, 500);
     } else {
       status.textContent = "⚠️ 無法取得驗證資訊，請重新登入。";
     }
