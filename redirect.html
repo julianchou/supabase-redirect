@@ -13,24 +13,25 @@
   <h2>正在導回 App，請稍候...</h2>
   <p id="status">⏳</p>
 
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get('code') || params.get('token');
-    const error = params.get('error');
-    const status = document.getElementById('status');
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get('code') || params.get('token');
+  const error = params.get('error');
+  const status = document.getElementById('status');
 
-    if (error) {
-      const desc = params.get('error_description') || '未知錯誤';
-      status.textContent = `⚠️ 驗證失敗：${desc}`;
-    } else if (code) {
-      const intentUrl = `intent://login-callback?code=${code}#Intent;scheme=io.supabase.flutter;package=com.julianchou.my_supabase_app;end`;
-      status.textContent = "✅ 將自動導回 App...";
-      setTimeout(() => {
-        window.location.href = intentUrl;
-      }, 500);
-    } else {
-      status.textContent = "⚠️ 無法取得驗證資訊，請重新登入。";
-    }
-  </script>
+  if (error) {
+    const desc = params.get('error_description') || '未知錯誤';
+    status.textContent = `⚠️ 驗證失敗：${desc}`;
+  } else if (code) {
+    const deeplink = `io.supabase.flutter://login-callback?code=${code}`;
+    status.textContent = "✅ 將自動導回 App...";
+    setTimeout(() => {
+      window.location.replace(deeplink); // ✅ 這行是關鍵
+    }, 500);
+  } else {
+    status.textContent = "⚠️ 無法取得驗證資訊，請重新登入。";
+  }
+</script>
+
 </body>
 </html>
